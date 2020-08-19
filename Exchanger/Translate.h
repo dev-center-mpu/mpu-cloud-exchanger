@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <SFML\Graphics\RenderWindow.hpp>
 
 namespace mpu {
 	bool Translate(char*& inFileBuffer, size_t inFileLen, std::string inFileExt, 

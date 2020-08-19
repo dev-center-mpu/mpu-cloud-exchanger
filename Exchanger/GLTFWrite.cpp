@@ -57,7 +57,7 @@ MbeConvResType GLTFWrite(MbModel& model, char* &outBuffer, size_t& outLength, ch
 	NodeVector vNodes; MeshVector vMeshes; std::multimap<MbItem*, Node> instanceMap;
 	BuildModelTree(root, MbPlacement3D::global, MbPlacement3D::global.GetMatrixFrom(), vNodes, vMeshes, stepData, formNote, instanceMap, true);
 
-		previewBuffer = DrawModel(vMeshes, vNodes, 600, 600);
+	previewBuffer = DrawModel(vMeshes, vNodes);
 
 	jsonOutput["asset"] = { {"version", "2.0"}, {"generator", "MPU-Cloud Converter 2020"} };
 	if (dracoCompress) {

@@ -9,6 +9,9 @@
 #include <CoreInit.h>
 #include <json.hpp>
 #include "../cpp-base64/base64.h"
+// SFML
+#include <SFML/Graphics.hpp>
+#include <SFML/OpenGL.hpp>
 
 using json = nlohmann::json;
 
@@ -20,33 +23,38 @@ const std::string licenseKey = "AW3FSVT2UOVSsLN1/jaPC0BCknN7KQyQXZ8jl1ogNpmlIbCQ
 
 int main(int argc, char* argv[])
 {
-    if (!CoreInit(licenseName, licenseKey)) return -1;
-    Server svr;
+    setlocale(LC_ALL, "RU");
 
-    svr.Get("/hi", [](const Request& req, Response& res) {
-        res.set_content("Hello World!", "text/plain");
-        return;
-    });
+    if (!CoreInit(licenseName, licenseKey)) {
+        std::cerr << "ОШИБКА: Не удалось активировать геометрическое ядро конвертера" << std::endl;
+        return -1;
+    }
+
+    Server svr;
+    if (!svr.is_valid()) {
+        std::cerr << "ОШИБКА: Не удалось создать сервер" << std::endl;
+        return -1;
+    }
 
     svr.Post("/model", [&](const auto& req, auto& res) {
         if (!req.has_file("file")) {
             json errorResponseBody;
-            errorResponseBody["error"] = "Invalid payload.";
-            errorResponseBody["detail"] = { { "file", "This field is required." } };
+            errorResponseBody["error"] = "Недостаточно аргументов";
+            errorResponseBody["detail"] = { { "file", "Необходимо приложить файл модели" } };
             res.status = 400;
             res.set_content(errorResponseBody.dump(), "application/json");
             return;
         } else if (!req.has_file("from")) {
             json errorResponseBody;
-            errorResponseBody["error"] = "Invalid payload.";
-            errorResponseBody["detail"] = { { "from", "This field is required." } };
+            errorResponseBody["error"] = "Недостаточно аргументов";
+            errorResponseBody["detail"] = { { "from", "Необходимо указать входящий формат" } };
             res.status = 400;
             res.set_content(errorResponseBody.dump(), "application/json");
             return;
         } else if (!req.has_file("to")) {
             json errorResponseBody;
-            errorResponseBody["error"] = "Invalid payload.";
-            errorResponseBody["detail"] = { { "to", "This field is required." } };
+            errorResponseBody["error"] = "Недостаточно аргументов";
+            errorResponseBody["detail"] = { { "to", "Необходимо указать исходящий формат" } };
             res.status = 400;
             res.set_content(errorResponseBody.dump(), "application/json");
             return;
@@ -79,6 +87,12 @@ int main(int argc, char* argv[])
         responseBody["output"] = base64_encode((const unsigned char*)outFileBuffer, outFileLen);
         responseBody["thumbnail"] = base64_encode((const unsigned char*)thumbnailBuffer, thumbnailLen);
 
+        std::ofstream os;
+        os.open("preview.png", std::ofstream::binary);
+        if (!os.is_open()) return;
+        os.write(thumbnailBuffer, thumbnailLen);
+        os.close(); 
+
        free(outFileBuffer);
        free(thumbnailBuffer);
         res.set_content(responseBody.dump(), "application/json");
@@ -91,5 +105,12 @@ int main(int argc, char* argv[])
         if (userPort > 0 || userPort < pow(2, 16)) port = userPort;
     }
 
-    return svr.listen("0.0.0.0", port);
+    std::cout << "Конвертер и средство предварительной визуализации успешно запущены и доступны по адресу: http:://127.0.0.1:" << port << std::endl;
+
+    if (!svr.listen("0.0.0.0", port)) {
+        std::cerr << "ОШИБКА: Не удалось запустить сервер" << std::endl;
+        return -1;
+    }
+
+    return 0;
 }

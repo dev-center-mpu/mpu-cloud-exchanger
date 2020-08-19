@@ -109,7 +109,71 @@ std::vector<float> TransformRGBtoBGR(std::vector<float> colors) {
 }
 
 void RenderShell(Node& n, MeshData& mesh, glm::mat4 viewMat) {
-	glEnable(GL_LIGHTING);
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+	std::vector<float> bgrColors = TransformRGBtoBGR(mesh._colors);
+	glm::mat4 modelMat = n._worldMatrix.empty() ? glm::mat4(1.0f) : glm::make_mat4(n._worldMatrix.data());
+	glm::mat4 modelViewMat = viewMat * modelMat;
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadMatrixf(glm::value_ptr(modelViewMat));
+
+	for (int i = 0; i < mesh._verticies.size(); i += 9) {
+		glBegin(GL_TRIANGLES);
+
+		glColor3f(
+			bgrColors[i], 
+			bgrColors[i + 1],
+			bgrColors[i + 2]);
+		glNormal3f(
+			mesh._normals[i],
+			mesh._normals[i + 1],
+			mesh._normals[i + 2]
+		);
+		glVertex3f(
+			mesh._verticies[i],
+			mesh._verticies[i + 1],
+			mesh._verticies[i + 2]
+		);
+
+		glColor3f(
+			bgrColors[i + 3],
+			bgrColors[i + 4],
+			bgrColors[i + 5]);
+		glNormal3f(
+			mesh._normals[i + 3],
+			mesh._normals[i + 4],
+			mesh._normals[i + 5]
+		);
+		glVertex3f(
+			mesh._verticies[i + 3],
+			mesh._verticies[i + 4],
+			mesh._verticies[i + 5]
+		);
+
+		glColor3f(
+			bgrColors[i + 6],
+			bgrColors[i + 7],
+			bgrColors[i + 8]);
+		glNormal3f(
+			mesh._normals[i + 6],
+			mesh._normals[i + 7],
+			mesh._normals[i + 8]
+		);
+		glVertex3f(
+			mesh._verticies[i + 6],
+			mesh._verticies[i + 7],
+			mesh._verticies[i + 8]
+		);
+
+		glEnd();
+	}
+
+	glPopMatrix();
+	glPopAttrib();
+
+	/*glEnable(GL_LIGHTING);
 	//glDisable(GL_LIGHTING);
 	//glDisable(GL_BLEND);
 	glEnable(GL_POLYGON_OFFSET_FILL);
@@ -136,12 +200,12 @@ void RenderShell(Node& n, MeshData& mesh, glm::mat4 viewMat) {
 	GLfloat colorEmission[] = { R * mesh.emission,    G * mesh.emission,    B * mesh.emission,    mesh.opacity };
 	GLfloat colorIndexes[] = { mesh.ambient, mesh.diffuse, mesh.opacity };
 
-	glMaterialfv(GL_FRONT, GL_AMBIENT, colorAmbient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, colorDiffuse);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, colorSpecular);
-	glMaterialfv(GL_FRONT, GL_EMISSION, colorEmission);
-	glMaterialf(GL_FRONT, GL_SHININESS, mesh.shininess);
-	glMaterialfv(GL_FRONT, GL_COLOR_INDEXES, colorIndexes);
+	//glMaterialfv(GL_FRONT, GL_AMBIENT, colorAmbient);
+	//glMaterialfv(GL_FRONT, GL_DIFFUSE, colorDiffuse);
+	//glMaterialfv(GL_FRONT, GL_SPECULAR, colorSpecular);
+	//glMaterialfv(GL_FRONT, GL_EMISSION, colorEmission);
+	//glMaterialf(GL_FRONT, GL_SHININESS, mesh.shininess);
+	//glMaterialfv(GL_FRONT, GL_COLOR_INDEXES, colorIndexes);
 
 	glMatrixMode(GL_MODELVIEW);
 	glm::mat4 modelView;
@@ -152,144 +216,185 @@ void RenderShell(Node& n, MeshData& mesh, glm::mat4 viewMat) {
 	glDrawArrays(GL_TRIANGLES, 0, mesh._verticies.size() / 3);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);*/
 }
 
 void RenderWireFrame(Node& n, MeshData& mesh, glm::mat4 viewMat) {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glEnable(GL_LIGHTING);
-
-	//glDisable(GL_LIGHTING);
-	glDisable(GL_POLYGON_OFFSET_FILL);
-	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(.5f);
 
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
+	//std::vector<float> colors(mesh._verticies.size()); 
+	//std::fill(colors.begin(), colors.end(), 0.f);
 
-	std::vector<float> colors(mesh._verticies.size()); 
-	std::fill(colors.begin(), colors.end(), 0.f);
+	//glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_COLOR_ARRAY);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
+	//glVertexPointer(3, GL_FLOAT, 0, mesh._verticies.data());
+	//glColorPointer(3, GL_FLOAT, 0, colors.data());
 
-	glVertexPointer(3, GL_FLOAT, 0, mesh._verticies.data());
-	glColorPointer(3, GL_FLOAT, 0, colors.data());
+	glm::mat4 modelMat = n._worldMatrix.empty() ? glm::mat4(1.0f) : glm::make_mat4(n._worldMatrix.data());
+	glm::mat4 modelViewMat = viewMat * modelMat;
 
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadMatrixf(glm::value_ptr(modelViewMat));
 
-	GLfloat R, G, B;
-	uint322RGB(mesh._color, B, G, R);
-	GLfloat colorAmbient2[] = { 0,     0, 0, 1 };
-	GLfloat colorDiffuse2[] = { 0,     0, 0, 1 };
-	GLfloat colorEmission2[] = { 0,    0,   0,    0 };
+	for (int i = 0; i < mesh._verticies.size(); i += 6) {
+		glBegin(GL_LINES);
+		glColor3f(0.f, 0.f, 0.f);
+		glVertex3f(
+			mesh._verticies[i], 
+			mesh._verticies[i + 1], 
+			mesh._verticies[i + 2]
+		);
+		glVertex3f(
+			mesh._verticies[i + 3],
+			mesh._verticies[i + 4],
+			mesh._verticies[i + 5]
+		);
+		glEnd();
+	}
 
-	glMaterialfv(GL_FRONT, GL_AMBIENT, colorAmbient2);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, colorDiffuse2);
+	glPopMatrix();
+	glPopAttrib();
+
+	//GLfloat R, G, B;
+	//uint322RGB(mesh._color, B, G, R);
+	//GLfloat colorAmbient2[] = { 0,     0, 0, 1 };
+	//GLfloat colorDiffuse2[] = { 0,     0, 0, 1 };
+	//GLfloat colorEmission2[] = { 0,    0,   0,    0 };
+
+	//glMaterialfv(GL_FRONT, GL_AMBIENT, colorAmbient2);
+	//glMaterialfv(GL_FRONT, GL_DIFFUSE, colorDiffuse2);
 
 	//float colour[4] = { 0,0,0,0 };
 	//glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colour);
 
 	//glColor3f(0, 0, 0);
 
+	/*glm::mat4 modelMat = n._worldMatrix.empty() ? glm::mat4(1.0f) : glm::make_mat4(n._worldMatrix.data());
+	glm::mat4 modelViewMat = viewMat * modelMat;
+
 	glMatrixMode(GL_MODELVIEW);
-	glm::mat4 transform = glm::mat4(1.0f);
-	if (!n._worldMatrix.empty()) transform = glm::make_mat4(n._worldMatrix.data());
-	glm::mat4 modelView = viewMat * transform;
-	glLoadMatrixf(glm::value_ptr(modelView));
+	glPushMatrix();
+	glLoadMatrixf(glm::value_ptr(modelViewMat));
 	glDrawArrays(GL_LINES, 0, mesh._verticies.size() / 3);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
-	glPopAttrib();
+	glPopMatrix();
+	glPopAttrib();*/
 }
 
 void RenderNode(Node& n, NodeVector& nodes, MeshVector& meshes, glm::mat4 viewMat) {
 	if (n._type != Part) return;
+	if (n._children.empty()) return;
 
 	Node& shellNode = nodes[n._children[0]];
 	if (shellNode._type == Mesh) {
 		MeshData& mesh = meshes[shellNode._mesh];
-			RenderShell(n, mesh, viewMat);
+		if ((mesh._verticies.size() >= 3 
+			&& mesh._normals.size() >= 3 
+			&& mesh._colors.size() >= 3) 
+			&& (mesh._verticies.size() == mesh._normals.size()
+			&& mesh._normals.size() == mesh._colors.size()))
+				RenderShell(n, mesh, viewMat);
 	}
 	
 	Node& wireNode = nodes[n._children[1]];
 	if (wireNode._type == Wireframe) {
 		MeshData& mesh = meshes[wireNode._mesh];
+		if (mesh._verticies.size() >= 3)
 			RenderWireFrame(n, mesh, viewMat);
 	}
 }
 
-draco::DataBuffer DrawModel(MeshVector meshes, NodeVector nodes, const int width, const int height)
+draco::DataBuffer DrawModel(MeshVector meshes, NodeVector nodes)
 {
 	draco::DataBuffer thumbnailBuffer;
 	if (meshes.size() == 0) return thumbnailBuffer;
 	if (nodes.size() == 0) return thumbnailBuffer;
-	if (meshes[0]._verticies.size() < 3) return thumbnailBuffer;
 
-	sf::ContextSettings settings;
-	settings.majorVersion = 1;
-	settings.minorVersion = 1;
-	settings.depthBits = 24;
-	//settings.stencilBits = 8;
-	//settings.antialiasingLevel = 4;
+	// Инициализация окошка
 
-	sf::RenderWindow window(sf::VideoMode(width, height), "Thumbnail drawing", sf::Style::Default, settings);
-	window.setActive(true);
-	glViewport(0, 0, width, height);
+	sf::RenderWindow renderWindow(sf::VideoMode(600, 600), "Drawing", sf::Style::Default);
+	if (!renderWindow.isOpen()) {
+		std::cerr << "ОШИБКА: Не удалось запустить окно предварительной визуализации моделей" << std::endl;
+		return thumbnailBuffer;
+	}
+	renderWindow.setActive(true);
+	renderWindow.setVisible(true);
+	glViewport(0, 0, renderWindow.getSize().x, renderWindow.getSize().y);
+	glClearColor(1.f, 1.f, 1.f, 0.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	MbCube modelBoundBox = CalculateBoundBox(nodes, meshes);
+	// Установка глобального освещения
 
-	glEnable(GL_CULL_FACE);
-
-	// Init OpenGL Scene Lightning
-
-	float lightAmbient = 0.6, lightDiffuse = 0.5, lightSpecular = 0.6;
-	GLfloat glfLightAmbient[] = { lightAmbient, lightAmbient, lightAmbient, 0.0f };
-	GLfloat glfLightDiffuse[] = { lightDiffuse, lightDiffuse, lightDiffuse, 0.0f };
-	GLfloat glfLightSpecular[] = { lightSpecular, lightSpecular, lightSpecular, 0.0f };
-	glm::vec4 lightPos = glm::vec4(-modelBoundBox.GetXMax(), -modelBoundBox.GetYMax(), modelBoundBox.GetZMax(), 0);
-
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
+	if (!glIsEnabled(GL_LIGHTING))
+		std::cerr << "ПРЕДУПРЕЖДЕНИЕ: Не удалось активировать освещение для предварительной визуализации" << std::endl;
 	glEnable(GL_LIGHT0);
+	if (!glIsEnabled(GL_LIGHT0))
+		std::cerr << "ПРЕДУПРЕЖДЕНИЕ: Не удалось активировать источник света для предварительной визуализации" << std::endl;
+
+	float lightAmbient = .6f, lightDiffuse = .5f, lightSpecular = .6f;
+	GLfloat glfLightAmbient[] = { lightAmbient, lightAmbient, lightAmbient, 1.f };
+	GLfloat glfLightDiffuse[] = { lightDiffuse, lightDiffuse, lightDiffuse, 1.f };
+	GLfloat glfLightSpecular[] = { lightSpecular, lightSpecular, lightSpecular, 1.f };
+	glm::vec4 lightPos = glm::vec4(-1.f, -1.f, 1.f, 0.f);
+
 	glLightfv(GL_LIGHT0, GL_AMBIENT, glfLightAmbient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, glfLightDiffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, glfLightSpecular);
 	glLightfv(GL_LIGHT0, GL_POSITION, glm::value_ptr(lightPos));
 
-	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glfLightAmbient);
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	if (!glIsEnabled(GL_DEPTH_TEST))
+		std::cerr << "ПРЕДУПРЕЖДЕНИЕ: Не удалось активировать тест глубины для предварительной визуализации" << std::endl;
+	glPolygonOffset(0.5f, 1.0f);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	if (!glIsEnabled(GL_POLYGON_OFFSET_FILL))
+		std::cerr << "ПРЕДУПРЕЖДЕНИЕ: Не удалось активировать смещение полигонов для предварительной визуализации" << std::endl;
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+	if (!glIsEnabled(GL_COLOR_MATERIAL))
+		std::cerr << "ПРЕДУПРЕЖДЕНИЕ: Не удалось активировать заливку моделей для предварительной визуализации" << std::endl;
 
-	float max_side = 0;
+	// Расчет матрицы вида и области видимости модели
 
-	glm::mat4 view = CalculateViewMatrix(modelBoundBox, max_side);
-	MbRect bb = Calculate2DBoundBox(modelBoundBox, view);
+	float max_side = 0; // Максимальный габарит модели
+	MbCube modelBoundBox = CalculateBoundBox(nodes, meshes);
+	glm::mat4 viewMat = CalculateViewMatrix(modelBoundBox, max_side);
+	MbRect screenBoundBox = Calculate2DBoundBox(modelBoundBox, viewMat);
 
-	// Init Projection Transform
+	// Установка ортогонального вида
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	if (bb.GetLengthX() > bb.GetLengthY()) {
-		double scale = bb.GetLengthX() / bb.GetLengthY();
-		bb.bottom *= scale; bb.top *= scale;
+	if (screenBoundBox.GetLengthX() > screenBoundBox.GetLengthY()) {
+		double scale = screenBoundBox.GetLengthX() / screenBoundBox.GetLengthY();
+		screenBoundBox.bottom *= scale; screenBoundBox.top *= scale;
 	}
-	else if (bb.GetLengthX() < bb.GetLengthY()) {
-		double scale = bb.GetLengthY() / bb.GetLengthX();
-			bb.left *= scale; bb.right *= scale;
+	else if (screenBoundBox.GetLengthX() < screenBoundBox.GetLengthY()) {
+		double scale = screenBoundBox.GetLengthY() / screenBoundBox.GetLengthX();
+			screenBoundBox.left *= scale; screenBoundBox.right *= scale;
 	}
-	bb.Enlarge(0.1f * max_side); // Make padding
 
-	//glOrtho(-screenSize, screenSize, -screenSize, screenSize, -1.0, max_side * 10);
-	glOrtho(bb.left, bb.right, bb.bottom, bb.top, -1.0, max_side * 10);
+	screenBoundBox.Enlarge(0.1f * max_side);
+	glOrtho(screenBoundBox.left, screenBoundBox.right, screenBoundBox.bottom, screenBoundBox.top, -1.0, max_side * 10);
+
+	// Отрисовка деталей сборки через OpenGL
 
 	for (Node& n : nodes) {
-		RenderNode(n, nodes, meshes, view);
+		RenderNode(n, nodes, meshes, viewMat);
 	}
 
-	BYTE* pixels = new BYTE[3 * width * height];
-	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0xFF0000, 0x00FF00, 0x0000FF, false);
+	// Создание снимка модели
+
+	BYTE* pixels = new BYTE[3 * renderWindow.getSize().x * renderWindow.getSize().y];
+	glReadPixels(0, 0, renderWindow.getSize().x, renderWindow.getSize().y, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, renderWindow.getSize().x, renderWindow.getSize().y, 3 * renderWindow.getSize().x, 24, 0xFF0000, 0x00FF00, 0x0000FF, false);
 
 	FIMEMORY* imgBuffer = FreeImage_OpenMemory();
 	FreeImage_SaveToMemory(FIF_PNG, image, imgBuffer);
@@ -298,12 +403,16 @@ draco::DataBuffer DrawModel(MeshVector meshes, NodeVector nodes, const int width
 	FreeImage_AcquireMemory(imgBuffer, &imgData, &imgBufferSize);
 	thumbnailBuffer.Update(imgData, imgBufferSize);
 
+	// Отчистка памяти и содержимого окошка
+
 	delete[] pixels;
 	FreeImage_CloseMemory(imgBuffer);
 	FreeImage_Unload(image);
-	window.resetGLStates();
-	window.clear();
-	window.setActive(false);
-	window.close();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	renderWindow.clear();
+	renderWindow.setActive(false);
+	renderWindow.setVisible(false);
+	renderWindow.close();
+
 	return thumbnailBuffer;
 }

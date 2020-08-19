@@ -30,10 +30,11 @@ int main(int argc, char* argv[])
 	char* thumbnailBuffer = 0;
 	size_t thumbnailLen = 0;
 	std::string errorMessage;
-	mpu::Translate(inFileBuffer, inFileLen, inFileExt,
+	/* mpu::Translate(inFileBuffer, inFileLen, inFileExt,
 		outFileBuffer, outFileLen, outFileExt, 
 		thumbnailBuffer, thumbnailLen,
 		errorMessage);
+		*/
 
 	std::ofstream os;
 	os.open(outFilePath, std::ofstream::binary);

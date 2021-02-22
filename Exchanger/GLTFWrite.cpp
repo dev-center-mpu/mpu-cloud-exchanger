@@ -50,7 +50,7 @@ MbeConvResType GLTFWrite(MbModel& model, char* &outBuffer, size_t& outLength, ch
 		return cnv_NoObjects;
 	}
 
-	MbStepData stepData(ist_DeviationStep, Math::visualSag);
+	MbStepData stepData(ist_SpaceStep, Math::visualSag);
 	MbFormNote formNote(false, true);
 	//formNote.SetExact(true);
 

@@ -263,7 +263,8 @@ int BuildModelTree(const MbItem* root, MbPlacement3D fromLCS, MbMatrix3D worldMa
 
 		MbMesh c3dMesh;
 		MbFaceShell* shell = solid->GetShell();
-		shell->CalculateMesh(sd, fn, c3dMesh);
+		//shell->CalculateMesh(sd, fn, c3dMesh);
+		solid->CalculateMesh(sd, fn, c3dMesh);
 		c3dMesh.ConvertAllToTriangles();
 
 		Node meshNode;
@@ -366,7 +367,6 @@ int BuildModelTree(const MbItem* root, MbPlacement3D fromLCS, MbMatrix3D worldMa
 			node._mesh = -1;
 			node._transformMatrix = c3dMatrix2Vec(trs);
 			nodes.push_back(node);
-			//std::cout << tab << "Assembly " << nodeIndex << " " << unicode2ansi(ToWstring(name)) << "\n";
 
 			MbMatrix3D worldMatrix(worldMat, trs);
 

@@ -18,8 +18,8 @@ using json = nlohmann::json;
 using namespace httplib;
 
 const int defaultPort = 3000;
-const std::string licenseName = "MosPolytech2020.2020011520201231.[cnv][mdl][slv][vsn][bsh]";
-const std::string licenseKey = "AW3FSVT2UOVSsLN1/jaPC0BCknN7KQyQXZ8jl1ogNpmlIbCQThcgQ1QNwvzKI+Aqk1oYjVsuQQudrcsHKJ9ERw==";
+const std::string licenseName = "MosPolytech2021.2021010120211231.[WIN][cnv][mdl][slv][vsn][bsh]";
+const std::string licenseKey = "0XWZTGXHMnUm0aGXkcaC6qU8PO7871GTOwtDMcgEjQ9vddOIIPoD6gx2Xrc9JqhN1eNMtaNJ2CD7jIdyMXNK9A==";
 
 int main(int argc, char* argv[])
 {
@@ -88,10 +88,19 @@ int main(int argc, char* argv[])
         responseBody["thumbnail"] = base64_encode((const unsigned char*)thumbnailBuffer, thumbnailLen);
 
         std::ofstream os;
+        os.open("preview." + outFileExt.content, std::ofstream::binary);
+        if (os.is_open())
+        { 
+            os.write(outFileBuffer, outFileLen);
+            os.close(); 
+        }
+
         os.open("preview.png", std::ofstream::binary);
-        if (!os.is_open()) return;
-        os.write(thumbnailBuffer, thumbnailLen);
-        os.close(); 
+        if (os.is_open()) 
+        {
+            os.write(thumbnailBuffer, thumbnailLen);
+            os.close();
+        }
 
        free(outFileBuffer);
        free(thumbnailBuffer);
